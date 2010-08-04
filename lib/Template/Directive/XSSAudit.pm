@@ -6,7 +6,7 @@ use Carp;
 
 BEGIN {
     use vars qw ($VERSION);
-    $VERSION = '0.05';
+    $VERSION = '0.06_1';
 }
 
 our $DEFAULT_ERROR_HANDLER = sub {

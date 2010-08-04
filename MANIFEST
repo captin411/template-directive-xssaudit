@@ -11,3 +11,4 @@ t/good_filters.t
 t/improperly_filtered.t
 t/on_error.t
 t/properly_filtered.t
+util/benchmark
