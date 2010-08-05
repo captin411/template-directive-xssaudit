@@ -17,13 +17,14 @@ name: Template-Directive-XSSAudit
 provides:
   Template::Directive::XSSAudit:
     file: lib/Template/Directive/XSSAudit.pm
-    version: 1.00_1
+    version: 1.00
 requires:
   Carp: 0
+  FindBin: 0
   Getopt::Long: 0
   Pod::Usage: 0
   Template: 0
   Template::Directive: 0
 resources:
   license: http://dev.perl.org/licenses/
-version: 1.00_1
+version: 1.00

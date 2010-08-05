@@ -5,7 +5,7 @@ use base qw/ Template::Directive /;
 
 BEGIN {
     use vars qw ($VERSION);
-    $VERSION = '0.06';
+    $VERSION = '1.00';
 }
 
 our $DEFAULT_ERROR_HANDLER = sub {

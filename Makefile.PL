@@ -5,16 +5,19 @@ WriteMakefile
           'PL_FILES' => {},
           'INSTALLDIRS' => 'site',
           'NAME' => 'Template::Directive::XSSAudit',
-          'EXE_FILES' => [],
+          'EXE_FILES' => [
+                           'script/ttxsscheck'
+                         ],
           'VERSION_FROM' => 'lib/Template/Directive/XSSAudit.pm',
           'PREREQ_PM' => {
-                           'Test::More' => 0,
-                           'List::Util' => 0,
                            'Getopt::Long' => 0,
                            'Pod::Usage' => 0,
+                           'FindBin' => 0,
                            'Template::Directive' => 0,
                            'Template' => 0,
-                           'Carp' => 0
+                           'Carp' => 0,
+                           'Test::More' => 0,
+                           'List::Util' => 0
                          }
         )
 ;
