@@ -46,6 +46,51 @@ my @tests = (
         },
     },
     {
+        count => 2,
+        code  => sub {
+            my $t = "one variable - after a literal";
+
+            my $input = "[% 'Mr.' _ user.email %]";
+
+            @RESPONSES = ();
+
+            $TT2->process(\$input,{},\my $out) || die $TT2->error();
+
+            is( scalar @RESPONSES, 1, "$t - num responses is correct");
+            is( $RESPONSES[0][0]->{variable_name}, 'user.email', "$t - variable name in response is correct");
+        },
+    },
+    {
+        count => 2,
+        code  => sub {
+            my $t = "one variable - before a literal";
+
+            my $input = "[% user.email _ 'number 2' %]";
+
+            @RESPONSES = ();
+
+            $TT2->process(\$input,{},\my $out) || die $TT2->error();
+
+            is( scalar @RESPONSES, 1, "$t - num responses is correct");
+            is( $RESPONSES[0][0]->{variable_name}, 'user.email', "$t - variable name in response is correct");
+        },
+    },
+    {
+        count => 2,
+        code  => sub {
+            my $t = "one variable - between literals";
+
+            my $input = "[% 'number 1' _ user.email _ 'number 2' %]";
+
+            @RESPONSES = ();
+
+            $TT2->process(\$input,{},\my $out) || die $TT2->error();
+
+            is( scalar @RESPONSES, 1, "$t - num responses is correct");
+            is( $RESPONSES[0][0]->{variable_name}, 'user.email', "$t - variable name in response is correct");
+        },
+    },
+    {
         count => 3,
         code  => sub {
             my $t = "the three types, ok, fail, not good";

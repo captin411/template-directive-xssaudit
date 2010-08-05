@@ -12,6 +12,7 @@ Module::Build->new(
     create_makefile_pl => 'traditional',
     requires           => {
         'Carp'                => 0,
+        'FindBin'             => 0,
         'Getopt::Long'        => 0,
         'Pod::Usage'          => 0,
         'Template'            => 0,

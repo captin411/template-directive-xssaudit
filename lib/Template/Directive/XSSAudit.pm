@@ -5,7 +5,7 @@ use base qw/ Template::Directive /;
 
 BEGIN {
     use vars qw ($VERSION);
-    $VERSION = '1.00_1';
+    $VERSION = '0.06';
 }
 
 our $DEFAULT_ERROR_HANDLER = sub {
@@ -191,10 +191,15 @@ sub good_filters {
 
 sub get {
     my $class = shift;
-    @checking_get = @_;
 
     my $result = $class->SUPER::get(@_);
     $_line_info = _parse_line_info($result);
+    _trigger_warnings();
+
+    if( $_[0] =~ /stash->get/ ) {
+        @checking_get = @_;
+    }
+
     return $result;
 }
 
