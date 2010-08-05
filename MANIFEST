@@ -6,6 +6,7 @@ Makefile.PL
 MANIFEST			This list of files
 META.yml
 README
+script/ttxsscheck
 t/001_load.t
 t/good_filters.t
 t/improperly_filtered.t

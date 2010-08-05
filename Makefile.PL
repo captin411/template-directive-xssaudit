@@ -10,6 +10,8 @@ WriteMakefile
           'PREREQ_PM' => {
                            'Test::More' => 0,
                            'List::Util' => 0,
+                           'Getopt::Long' => 0,
+                           'Pod::Usage' => 0,
                            'Template::Directive' => 0,
                            'Template' => 0,
                            'Carp' => 0

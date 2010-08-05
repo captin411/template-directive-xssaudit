@@ -40,7 +40,7 @@ EXPORTS
 
 METHODS
     Template::Directive::XSSAudit->on_error ( [ coderef ] )
-        A default implementation is provided which will simply "carp" any
+        A default implementation is provided which will simply "warn" any
         problems which are found.
 
         If you call this method without a subroutine reference, it will
@@ -52,24 +52,33 @@ METHODS
          - The variable is filtered but none of the filters 
            were found in the C<good_filter> list.
    
-        If you provide your own callback, it will be passed four parameters.
+        If you provide your own callback, it will be passed one parameter
+        which is a hash reference containing the following keys.
 
-        variable name
+        variable_name
             This is a string represending the variable name which was found
             to be incorrectly escaped.
 
-        filters applied to the variable (array ref of strings)
+        filtered_by
+            This will contain an array reference containing the names of the
+            filters which were applied to the variable name.
+
+            If there are entries in this list, it means that no filter in
+            the good filter list was found to apply to the variable. See
+            "good_filter" for more information.
+
             In the case of variables with no filters, this will be an empty
-            array reference. If there are entries in this list, it means
-            that no filter in the good filter list was found to apply to the
-            variable. See "good_filter" for more information.
+            array reference.
 
-        list of all good filters (array ref of strings)
-            This is the exact same information that you can get from the
-            "good_filters" method call.
+        file_name
+            The line number in the template file where the problem occurred.
 
-        line number information (not always present)
-            This is the line number and filename where the problem occurred.
+            This is parsed out as best as can be done but it may come back
+            as an empty string in many cases. It is a convenience item and
+            should not be relied on for any sort of automation.
+
+        file_line
+            The line number in the template file where the problem occurred.
 
             This is parsed out as best as can be done but it may come back
             as an empty string in many cases. It is a convenience item and
