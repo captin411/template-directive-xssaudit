@@ -1,8 +1,43 @@
 use Test::More;
 
 use Template::Directive::XSSAudit;
+use Template;
 
 my @tests = (
+    sub {
+        my $t = "Callback parameter format";
+
+        my $TT2 = Template->new({ FACTORY => 'Template::Directive::XSSAudit' });
+
+        my $input = "[% user.email | format('%d') %]";
+
+        my $RESPONSE;
+        Template::Directive::XSSAudit->on_error( sub {
+            $RESPONSE = \@_;
+        });
+
+        $TT2->process(\$input,{},\my $out) || die $TT2->error();
+
+        Template::Directive::XSSAudit->on_error( 
+            $Template::Directive::XSSAudit::DEFAULT_ERROR_HANDLER
+        );
+
+        my $param = $RESPONSE->[0];
+        my $expected_param = {
+          'filtered_by' => [],
+          'file_name' => 'input text',
+          'file_line' => '1',
+          'variable_name' => 'user.email'
+        };
+        my @expected_keys = sort qw( variable_name filtered_by file_name file_line );
+        my @has_keys      = sort keys %$param;
+
+        is( scalar @$RESPONSE, 1, "$t - callback was passed only one parameter" );
+        is( ref($param), "HASH", "$t - parameter is a hash ref" );
+        is_deeply( \@has_keys, \@expected_keys, "$t - expected hash keys were provided" );
+        is_deeply( $param, $expected_param, "$t - expected hash values were provided" );
+        
+    },
     sub {
         my $t = "Default event handler is installed";
 
@@ -52,6 +87,6 @@ my @tests = (
 
 );
 
-plan tests => scalar @tests;
+plan tests => scalar @tests + 3;
 
 $_->() for @tests;
