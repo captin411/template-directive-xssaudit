@@ -22,5 +22,8 @@ Module::Build->new(
         'Test::More'          => 0,
         'Template'            => 0,
     },
+    script_files => {
+        'script/ttxsscheck' => 'script/ttxsscheck',
+    },
 )->create_build_script;
 

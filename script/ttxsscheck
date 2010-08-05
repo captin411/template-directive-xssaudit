@@ -20,9 +20,7 @@ GetOptions(
 pod2usage(1) if $help;
 
 foreach my $class (@plugins) {
-    eval {
-        require $class; 
-    };
+    eval "require $class";
     warn($@) if $@;
 }
 
