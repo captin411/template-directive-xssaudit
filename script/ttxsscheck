@@ -1,0 +1,79 @@
+#!/usr/bin/env perl
+
+use Getopt::Long;
+
+use Template;
+use Template::Directive::XSSAudit;
+use Pod::Usage;
+
+my $help;
+my @libs;
+my @plugins;
+my @filters;
+
+GetOptions(
+    'help'     => \$help,
+    'lib=s'    => \@libs,
+    'plugin=s' => \@plugins,
+    'filter=s' => \@filters,
+) or pod2usage(2);
+pod2usage(1) if $help;
+
+foreach my $class (@plugins) {
+    eval {
+        require $class; 
+    };
+    warn($@) if $@;
+}
+
+my $tt_config = {
+    FACTORY => 'Template::Directive::XSSAudit',
+    ABSOLUTE => 1,
+    INCLUDE_PATH => \@libs,
+};
+my $tt = Template->new($tt_config);
+
+Template::Directive::XSSAudit->good_filters(
+    \@filters
+) if @filters;
+
+foreach my $file (@ARGV) {
+    my $on_error = sub {
+        my $context = shift || {};
+    
+        my $var_name     = $context->{variable_name};
+        my $filters      = $context->{filtered_by};
+        my $file         = $file;
+        my $line_no      = $context->{file_line} || 0;
+        my $problem_type = @$filters ? "NO_SAFE_FILTER" : "NO_FILTERS";
+
+        my $used_filters = @$filters ? "\t" . (join ",", @$filters) : "";
+
+        printf("%s\t%s\tline:%-5d\t%s%s\n",
+            $file, $problem_type, $line_no, $var_name, $used_filters
+        )
+    };
+    Template::Directive::XSSAudit->on_error($on_error);
+    $tt->process($file, {}, \my $out) || warn($tt->error());
+}
+
+1;
+__END__
+
+=head1 NAME
+
+ttxsscheck - list potential XSS problems with a Template Toolkit file
+
+=head1 SYNOPSIS
+
+ Usage:
+   ttxsscheck [options] [files]
+
+ Options:
+   -h     (--help)       This help
+   -l DIR (--lib=DIR)    Library directory (INCLUDE_PATH) (multiple)
+   -p MOD (--plugin=MOD) Additional perl class names that you would
+                         like to load. Useful if you have custom
+                         filters. (multiple)
+   -f     (--filter)     Override what is considered a 'good' filter
+                         (multiple)

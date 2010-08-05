@@ -11,9 +11,11 @@ Module::Build->new(
     create_readme      => 1,
     create_makefile_pl => 'traditional',
     requires           => {
-        'Template::Directive' => 0,
-        'Template'            => 0,
         'Carp'                => 0,
+        'Getopt::Long'        => 0,
+        'Pod::Usage'          => 0,
+        'Template'            => 0,
+        'Template::Directive' => 0,
     },
     build_requires => {
         'List::Util'          => 0,

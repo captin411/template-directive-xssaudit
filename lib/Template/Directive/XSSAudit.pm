@@ -2,7 +2,6 @@ package Template::Directive::XSSAudit;
 use strict;
 use warnings;
 use base qw/ Template::Directive /;
-use Carp qw( cluck );
 
 BEGIN {
     use vars qw ($VERSION);
@@ -15,12 +14,12 @@ our $DEFAULT_ERROR_HANDLER = sub {
 
     my $var_name     = $context->{variable_name};
     my $filters      = $context->{filtered_by};
-    my $file         = $context->{file_name};
-    my $line_no      = $context->{file_line};
+    my $file         = $context->{file_name} || '';
+    my $line_no      = $context->{file_line} || '';
     my $problem_type = @$filters ? "SAFE_FILTERS_UNUSED" : "NO_FILTERS";
 
-    carp(
-        sprintf("%s\tline:%d\t%s\t%s\t[%s]",
+    warn(
+        sprintf("%s\tline:%s\t%s\t%s\t[%s]\n",
             $file, $line_no,
             $problem_type, $var_name,
             join ', ', @$filters
@@ -88,7 +87,7 @@ None.
 
 =item Template::Directive::XSSAudit->on_error ( [ coderef ] )
 
-A default implementation is provided which will simply C<carp> any
+A default implementation is provided which will simply C<warn> any
 problems which are found.
 
 If you call this method without a subroutine reference, it will simply
