@@ -35,24 +35,36 @@ Template::Directive::XSSAudit->good_filters(
     \@filters
 ) if @filters;
 
+Template::Directive::XSSAudit->on_error(sub {
+    my ($context) = @_;
+    print pretty_event_message('on_error',$context);
+});
+Template::Directive::XSSAudit->on_filtered(sub {
+    my ($context) = @_;
+    print pretty_event_message('on_filtered',$context);
+});
 foreach my $file (@ARGV) {
-    my $on_error = sub {
-        my $context = shift || {};
-    
-        my $var_name     = $context->{variable_name};
-        my $filters      = $context->{filtered_by};
-        my $file         = $file;
-        my $line_no      = $context->{file_line} || 0;
-        my $problem_type = @$filters ? "NO_SAFE_FILTER" : "NO_FILTERS";
-
-        my $used_filters = @$filters ? "\t" . (join ",", @$filters) : "";
-
-        printf("%s\t%s\tline:%-5d\t%s%s\n",
-            $file, $problem_type, $line_no, $var_name, $used_filters
-        )
-    };
-    Template::Directive::XSSAudit->on_error($on_error);
     $tt->process($file, {}, \my $out) || warn($tt->error());
+}
+
+exit;
+
+sub pretty_event_message {
+    my($event, $context) = @_;
+
+    my $var_name     = $context->{variable_name};
+    my $filters      = $context->{filtered_by};
+    my $file         = $context->{file_name} || '<unknown_file>';
+    my $line_no      = $context->{file_line} || 0;
+
+    my $problem_type = $event eq "on_filtered" ? "OK"
+                       : @$filters             ? "NO_SAFE_FILTER"
+                       :                         "NO_FILTERS";
+    my $used_filters = @$filters ? "\t" . (join ",", @$filters) : "";
+
+    sprintf("%s\t%s\tline:%-5d\t%s%s\n",
+        $file, $problem_type, $line_no, $var_name, $used_filters
+    )
 }
 
 1;

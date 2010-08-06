@@ -11,5 +11,6 @@ t/001_load.t
 t/good_filters.t
 t/improperly_filtered.t
 t/on_error.t
+t/on_filtered.t
 t/properly_filtered.t
 util/benchmark

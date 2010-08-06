@@ -5,7 +5,7 @@ use base qw/ Template::Directive /;
 
 BEGIN {
     use vars qw ($VERSION);
-    $VERSION = '1.00';
+    $VERSION = '1.01';
 }
 
 our $DEFAULT_ERROR_HANDLER = sub {
@@ -27,10 +27,12 @@ our $DEFAULT_ERROR_HANDLER = sub {
     );
 
 };
+our $DEFAULT_OK_HANDLER   = sub { };
 
 our @DEFAULT_GOOD_FILTERS = qw( html uri );
 
 my $_error_handler = $DEFAULT_ERROR_HANDLER;
+my $_ok_handler    = $DEFAULT_OK_HANDLER;
 my @_good_filters  = @DEFAULT_GOOD_FILTERS;
 
 
@@ -71,6 +73,10 @@ files.
 A callback may be provided so that the errors may be handled in a way that
 makes sense for the project at hand.  See C<on_error> for more details.
 
+There is another callback which can be provided named C<on_filtered>. This is
+triggered when a variable is successfully filtered.  By default there is
+no implementation.  See C<on_filtered> for more details.
+
 Additionally, a list of filter names may be provided, instructing the module
 to require that certain filters be used for output escaping in the tests.
 
@@ -87,18 +93,21 @@ None.
 
 =item Template::Directive::XSSAudit->on_error ( [ coderef ] )
 
-A default implementation is provided which will simply C<warn> any
-problems which are found.
-
-If you call this method without a subroutine reference, it will simply
-return you the current implementation.
+This method is called on every variable involved in a template
+toolkit 'GET' which was not filtered properly. 
 
 The callback will be executed in one of two cases:
 
  - The variable in question has NO output filtering
  - The variable is filtered but none of the filters 
    were found in the C<good_filter> list.
-   
+
+A default implementation is provided which will simply C<warn> any
+problems which are found.
+
+If you call this method without a subroutine reference, it will simply
+return you the current implementation.
+
 
 If you provide your own callback, it will be passed one parameter 
 which is a hash reference containing the following keys.
@@ -154,6 +163,36 @@ sub on_error {
         $_error_handler = $callback;
     }
     return $_error_handler;
+}
+
+=over 4
+
+=item Template::Directive::XSSAudit->on_filtered ( [ coderef ] )
+
+This method is called on every variable involved in a template
+toolkit 'GET' which was filtered satisfactorily. 
+
+By default, no implementation is given so if you want this to
+do anything, you'll have to provide a coderef yourself.
+
+The callback and function works just like C<on_error> so see the
+documentation for that method for more details.
+
+=back
+
+=cut
+
+sub on_filtered {
+    my $class = shift;
+    my ($callback) = @_;
+    if( $callback ) {
+        if( ref($callback) ne "CODE" ) {
+            croak("argument to on_filtered must be a subroutine reference"); 
+        }
+        $_ok_handler = $callback;
+    }
+    return $_ok_handler;
+    
 }
 
 =over 4
@@ -271,17 +310,16 @@ sub _trigger_warnings {
 
         }
 
-        if(!@good_filters) {
+        $_line_info =~ /#line\s+(\d+)\s+"(.+?)"/;
+        my($file_line,$file_name) = ($1, $2); 
+        my $event_sub = !@good_filters ? on_error() : on_filtered();
+        $event_sub->({
+            variable_name => $latest_ident,
+            filtered_by   => [ @applied_filters ],
+            file_name => $file_name,
+            file_line => $file_line,
+        });
 
-            $_line_info =~ /#line\s+(\d+)\s+"(.+?)"/;
-            my($file_line,$file_name) = ($1, $2); 
-            on_error()->({
-                variable_name => $latest_ident,
-                filtered_by   => \@applied_filters,
-                file_name => $file_name,
-                file_line => $file_line,
-            });
-        }
         $_line_info      = '';
         $latest_ident    = '';
         @applied_filters = ();

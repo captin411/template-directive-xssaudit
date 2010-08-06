@@ -9,22 +9,22 @@ my @tests = (
 
         my $TT2 = Template->new({ FACTORY => 'Template::Directive::XSSAudit' });
 
-        my $input = "[% user.email | format('%d') %]";
+        my $input = "[% user.email | html %]";
 
         my $RESPONSE;
-        Template::Directive::XSSAudit->on_error( sub {
+        Template::Directive::XSSAudit->on_filtered( sub {
             $RESPONSE = \@_;
         });
 
         $TT2->process(\$input,{},\my $out) || die $TT2->error();
 
-        Template::Directive::XSSAudit->on_error( 
-            $Template::Directive::XSSAudit::DEFAULT_ERROR_HANDLER
+        Template::Directive::XSSAudit->on_filtered(
+            $Template::Directive::XSSAudit::DEFAULT_OK_HANDLER,
         );
 
         my $param = $RESPONSE->[0];
         my $expected_param = {
-          'filtered_by' => [ 'format' ],
+          'filtered_by' => [ 'html' ],
           'file_name' => 'input text',
           'file_line' => '1',
           'variable_name' => 'user.email'
@@ -42,8 +42,8 @@ my @tests = (
         my $t = "Default event handler is installed";
 
         is(
-            $Template::Directive::XSSAudit::DEFAULT_ERROR_HANDLER,
-            Template::Directive::XSSAudit->on_error(),
+            $Template::Directive::XSSAudit::DEFAULT_OK_HANDLER,
+            Template::Directive::XSSAudit->on_filtered(),
             $t
         );
 
@@ -52,15 +52,15 @@ my @tests = (
         my $t = "Setting event handler - coderef";
 
         my $code = sub { 1; };
-        Template::Directive::XSSAudit->on_error( $code );
-        is( $code, Template::Directive::XSSAudit->on_error, $t );
+        Template::Directive::XSSAudit->on_filtered( $code );
+        is( $code, Template::Directive::XSSAudit->on_filtered, $t );
 
     },
     sub {
         my $t = "Setting event handler - set to string (should die)";
 
         eval {
-            Template::Directive::XSSAudit->on_error( "asdf" );
+            Template::Directive::XSSAudit->on_filtered( "asdf" );
         };
         my $err = $@;
         ok( $err, $t );
@@ -70,9 +70,9 @@ my @tests = (
         my $t = "Event handler stays the same when reading it";
 
         my $code1 = sub { 1; };
-        Template::Directive::XSSAudit->on_error( $code1 );
+        Template::Directive::XSSAudit->on_filtered( $code1 );
 
-        my $code2 = Template::Directive::XSSAudit->on_error();
+        my $code2 = Template::Directive::XSSAudit->on_filtered();
         is( $code1, $code2, $t );
 
     },
@@ -80,7 +80,7 @@ my @tests = (
         my $t = "Get and set operation at the same time";
 
         my $code1 = sub { 9999; };
-        my $code2 = Template::Directive::XSSAudit->on_error( $code1 );
+        my $code2 = Template::Directive::XSSAudit->on_filtered( $code1 );
         is( $code1, $code2, $t );
 
     },
