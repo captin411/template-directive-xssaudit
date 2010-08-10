@@ -11,6 +11,16 @@
 #========================================================================
 
 #-----------------------------------------------------------------------
+# Version  1.02 - 10th Aug 2010
+#------------------------------------------------------------------------
+
+* META.yml now contains more resources such as repository, bugtracker
+  and homepage (thanks to t0m on irc.perl.org/#catalyst for pointing
+  this out)
+* Documentation updated to reflect new error output format
+* Documentation for ttxsscheck updated to have more information
+
+#-----------------------------------------------------------------------
 # Version  1.01 - 6th Aug 2010
 #------------------------------------------------------------------------
 

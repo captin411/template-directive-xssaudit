@@ -87,3 +87,12 @@ ttxsscheck - list potential XSS problems with a Template Toolkit file
                          filters. (multiple)
    -f     (--filter)     Override what is considered a 'good' filter
                          (multiple)
+
+ Examples:
+   # single file check -- setting INCLUDE_PATH to handle relative includes
+   # one or more of the 'html' or 'uri' filters must be used for the GET
+   # to be considered "good"
+   ttxsscheck -l /your/tt/root -f html -f uri -f other_filter /your/tt/root/index.tt
+  
+   # using xargs and find to do a whole bunch of TT files
+   find /your/tt/root-name '*.tt' | xargs ttxsscheck [options] 

@@ -18,6 +18,13 @@ Module::Build->new(
         'Template'            => 0,
         'Template::Directive' => 0,
     },
+    meta_merge => {
+        'resources' => {
+            'homepage' => 'http://github.com/captin411/template-directive-xssaudit',
+            'bugtracker' => 'https://rt.cpan.org/Public/Dist/Display.html?Name=Template-Directive-XSSAudit',
+            'repository' => 'http://github.com/captin411/template-directive-xssaudit',
+        },
+    },
     build_requires => {
         'List::Util'          => 0,
         'Test::More'          => 0,

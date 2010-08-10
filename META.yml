@@ -26,5 +26,8 @@ requires:
   Template: 0
   Template::Directive: 0
 resources:
+  bugtracker: https://rt.cpan.org/Public/Dist/Display.html?Name=Template-Directive-XSSAudit
+  homepage: http://github.com/captin411/template-directive-xssaudit
   license: http://dev.perl.org/licenses/
+  repository: http://github.com/captin411/template-directive-xssaudit
 version: 1.01

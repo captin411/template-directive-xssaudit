@@ -5,7 +5,7 @@ use base qw/ Template::Directive /;
 
 BEGIN {
     use vars qw ($VERSION);
-    $VERSION = '1.01';
+    $VERSION = '1.02';
 }
 
 our $DEFAULT_ERROR_HANDLER = sub {
@@ -62,13 +62,18 @@ Template::Directive::XSSAudit - TT2 output filtering lint testing
   my $out  = '';
   $tt->process(\$input, {}, \$out) || die $tt->error();
 
-  -- STDERR
-  NO_FILTERS       -- exploitable.goodness at /usr/lib/perl5/Template/Parser.pm line 831
+  # output on STDOUT... via default on_error handler
+  # see the documentation of on_error for explanation of the
+  # output format of the default error handler
+  \tline:\tNO_FILTERS\texploitable.goodness\t[]
 
 =head1 DESCRIPTION
 
 This module will help you perform basic lint tests of your template toolkit
 files. 
+
+It is intended to parse through all GET items, and make sure that at least
+one "good" filter is used to escape it.
 
 A callback may be provided so that the errors may be handled in a way that
 makes sense for the project at hand.  See C<on_error> for more details.
@@ -82,6 +87,18 @@ to require that certain filters be used for output escaping in the tests.
 
 Have a look at the t/*.t files that come with the distribution as they
 leverage the C<on_error()> callback routine.
+
+=head1 IMPORTANT NOTES ON SECURITY
+
+This tool is NOT a substitude for code and security reviews as it is NOT
+context aware. This means if you use a html filter in javascript context
+or css context or html attribute context, you would not be escaping things
+properly and this tool would not catch that.  
+
+You also need to make sure that your "good" filters are actually doing their
+job and escaping things properly.
+
+All of this to say, don't let this give you a false sense of security.
 
 =head1 EXPORTS
 
@@ -103,11 +120,12 @@ The callback will be executed in one of two cases:
    were found in the C<good_filter> list.
 
 A default implementation is provided which will simply C<warn> any
-problems which are found.
+problems which are found with the following information (tab delimited):
+
+  <file_name> line:<line_no>    <error_type>    [<filters used csv>]
 
 If you call this method without a subroutine reference, it will simply
 return you the current implementation.
-
 
 If you provide your own callback, it will be passed one parameter 
 which is a hash reference containing the following keys.
