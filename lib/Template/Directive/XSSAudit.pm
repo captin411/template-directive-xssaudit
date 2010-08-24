@@ -5,26 +5,17 @@ use base qw/ Template::Directive /;
 
 BEGIN {
     use vars qw ($VERSION);
-    $VERSION = '1.02';
+    $VERSION = '1.03';
 }
 
 our $DEFAULT_ERROR_HANDLER = sub {
 
     my $context = shift || {};
 
-    my $var_name     = $context->{variable_name};
-    my $filters      = $context->{filtered_by};
-    my $file         = $context->{file_name} || '';
-    my $line_no      = $context->{file_line} || '';
-    my $problem_type = @$filters ? "SAFE_FILTERS_UNUSED" : "NO_FILTERS";
-
-    warn(
-        sprintf("%s\tline:%s\t%s\t%s\t[%s]\n",
-            $file, $line_no,
-            $problem_type, $var_name,
-            join ', ', @$filters
-        )
-    );
+    warn __PACKAGE__->event_parameter_to_string(
+        $context,
+        'on_error'
+    ) . "\n";
 
 };
 our $DEFAULT_OK_HANDLER   = sub { };
@@ -65,7 +56,7 @@ Template::Directive::XSSAudit - TT2 output filtering lint testing
   # output on STDOUT... via default on_error handler
   # see the documentation of on_error for explanation of the
   # output format of the default error handler
-  \tline:\tNO_FILTERS\texploitable.goodness\t[]
+  #input file   NO_FILTERS  line:1    exploitable.goodness
 
 =head1 DESCRIPTION
 
@@ -122,7 +113,7 @@ The callback will be executed in one of two cases:
 A default implementation is provided which will simply C<warn> any
 problems which are found with the following information (tab delimited):
 
-  <file_name> line:<line_no>    <error_type>    [<filters used csv>]
+  <file_name> <error_type> line:<line_no> <filters used csv>
 
 If you call this method without a subroutine reference, it will simply
 return you the current implementation.
@@ -211,6 +202,25 @@ sub on_filtered {
     }
     return $_ok_handler;
     
+}
+
+sub event_parameter_to_string {
+    my $class = shift;
+    my($context, $event) = @_;
+
+    my $var_name     = $context->{variable_name};
+    my $filters      = $context->{filtered_by};
+    my $file         = $context->{file_name} || '<unknown_file>';
+    my $line_no      = $context->{file_line} || 0;
+
+    my $problem_type = $event eq "on_filtered" ? "OK"
+                       : @$filters             ? "NO_SAFE_FILTER"
+                       :                         "NO_FILTERS";
+    my $used_filters = @$filters ? "\t" . (join ",", @$filters) : "";
+
+    return sprintf("%s\t%s\tline:%d\t%s%s",
+        $file, $problem_type, $line_no, $var_name, $used_filters
+    )
 }
 
 =over 4
